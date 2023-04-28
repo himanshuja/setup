@@ -30,42 +30,41 @@ services:
     image: mysql:latest
     restart: unless-stopped
     environment:
-      - MYSQL_ROOT_PASSWORD: ${root_password}
-      - MYSQL_DATABASE: npm
-      - MYSQL_USER: npm
-      - MYSQL_PASSWORD: npm
+      - MYSQL_ROOT_PASSWORD= 8Deudue83e
+      - MYSQL_DATABASE= npm
+      - MYSQL_USER= npm
+      - MYSQL_PASSWORD= npm
     volumes:
       - sql_data:/var/lib/mysql
 
   phpmyadmin:
     image: phpmyadmin:latest
     environment:
-      PMA_HOST: db
-      MYSQL_ROOT_PASSWORD: root
+     - PMA_HOST= db
+     - MYSQL_ROOT_PASSWORD= root
     # ports:
     #   - '8081:80'
     depends_on:
       - db
-
   n8n:
     image: n8nio/n8n
     restart: unless-stopped
     environment:
-      DB_TYPE: mysql
-      DB_MYSQLDB_HOST: db
-      DB_MYSQLDB_PORT: 3306
-      DB_MYSQLDB_DATABASE: n8n
-      DB_MYSQLDB_USER: root
-      DB_MYSQLDB_PASSWORD: ${root_password}
-      GENERIC_TIMEZONE: Asia/Kolkata
-      DOMAIN_NAME: ${Given_Domain}
-      NODE_ENV: production
-      WEBHOOK_URL: ${Given_webhook_url}
-      WORKFLOWS_DEFAULT_NAME: "n8n Workflow"
-      EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS: true
-      EXECUTIONS_DATA_SAVE_ON_ERROR: all
-      EXECUTIONS_DATA_SAVE_ON_PROGRESS: true
-      EXECUTIONS_DATA_SAVE_ON_SUCCESS: all
+      - DB_TYPE= mysqldb
+      - DB_MYSQLDB_HOST= db
+      - DB_MYSQLDB_PORT= 3306
+      - DB_MYSQLDB_DATABASE= n8n
+      - DB_MYSQLDB_USER= root
+      - DB_MYSQLDB_PASSWORD= 8Deudue83e
+      - GENERIC_TIMEZONE= Asia/Kolkata
+      - DOMAIN_NAME= demo.workflow.teamat.work
+      - NODE_ENV= production
+      - WEBHOOK_URL= demo.workflow.teamat.work
+      - WORKFLOWS_DEFAULT_NAME= "n8n Workflow"
+      - EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS= true
+      - EXECUTIONS_DATA_SAVE_ON_ERROR= all
+      - EXECUTIONS_DATA_SAVE_ON_PROGRESS= true
+      - EXECUTIONS_DATA_SAVE_ON_SUCCESS= all
     # ports:
     #   - '5678:5678'
     volumes:
