@@ -77,7 +77,7 @@ fi
 # Check if Docker is running
 if sudo systemctl is-active --quiet docker; then
     echo "Docker is running."
-   sudo apt install docker-compose; then
+   sudo apt install docker-compose;
     echo "Docker-compose installed."
     # Fetch Docker Compose file and deploy Docker stack
     curl -O https://raw.githubusercontent.com/himanshuja/setup/main/docker-compose.yml
