@@ -79,7 +79,7 @@ if sudo systemctl is-active --quiet docker; then
     echo "Docker is running."
 
     # Fetch Docker Compose file and deploy Docker stack
-    curl -O https://example.com/docker-compose.yml
+    curl -O https://raw.githubusercontent.com/himanshuja/setup/main/docker-compose.yml
     sudo docker-compose up -d
 
     # Return Docker installation environment file details
