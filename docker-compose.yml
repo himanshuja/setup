@@ -60,7 +60,6 @@ services:
       - DOMAIN_NAME=demo.workflow.teamat.work
       - NODE_ENV=production
       - WEBHOOK_URL=demo.workflow.teamat.work
-      - WORKFLOWS_DEFAULT_NAME="n8n Workflow"
       - EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS=true
       - EXECUTIONS_DATA_SAVE_ON_ERROR=all
       - EXECUTIONS_DATA_SAVE_ON_PROGRESS=true
