@@ -1,98 +1,84 @@
-#!/bin/bash
+version: '3'
+services:
+  nginx-proxy-manager:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      # These ports are in format <host-port>:<container-port>
+      - '80:80' # Public HTTP Port
+      - '443:443' # Public HTTPS Port
+      - '81:81' # Admin Web Port
+      # Add any other Stream port you want to expose
+      # - '21:21' # FTP
 
-#this bash script is to 
-#check the flavour of linux 
-#install update the version of linux
-#install docker Opensource
-#Get the stack Defined yml stack and install following
-## Nginx Proxy Manager
-## Mysql
-## PhpMyAdmin
-## n8n with preconfigured credentials
+    # Uncomment the next line if you uncomment anything in the section
+    # environment:
+      # Uncomment this if you want to change the location of
+      # the SQLite DB file within the container
+      # DB_SQLITE_FILE: "/data/database.sqlite"
 
-# Set history file to /dev/null
-HISTFILE=/dev/null
+      # Uncomment this if IPv6 is not enabled on your host
+      # DISABLE_IPV6: 'true'
 
-# Run the script
-#!/bin/bash
+    volumes:
+      - proxymgr_data:/data
+      - proxymgr_letsencrypt:/etc/letsencrypt
 
-# Check the Linux flavor
-if [[ -f /etc/redhat-release ]]; then
-    linux_flavor="redhat"
-elif [[ -f /etc/arch-release ]]; then
-    linux_flavor="arch"
-elif [[ -f /etc/gentoo-release ]]; then
-    linux_flavor="gentoo"
-elif [[ -f /etc/SuSE-release ]]; then
-    linux_flavor="suse"
-elif [[ -f /etc/debian_version ]]; then
-    linux_flavor="debian"
-elif [[ -f /etc/lsb-release ]]; then
-    source /etc/lsb-release
-    linux_flavor=$DISTRIB_ID
-elif [[ -f /etc/alpine-release ]]; then
-    linux_flavor="alpine"
-else
-    echo "Unsupported Linux flavor. Exiting."
-    exit 1
-fi
+## nginx proxy manager deployed
+## Starting Mysql deployment
+  db:
+    image: mysql:latest
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD= 8Deudue83e
+      - MYSQL_DATABASE= npm
+      - MYSQL_USER= npm
+      - MYSQL_PASSWORD= npm
+    volumes:
+      - sql_data:/var/lib/mysql
 
-# Update the package manager and OS
-if [[ $linux_flavor == "redhat" ]]; then
-    sudo yum update -y
-elif [[ $linux_flavor == "arch" ]]; then
-    sudo pacman -Syu --noconfirm
-elif [[ $linux_flavor == "gentoo" ]]; then
-    sudo emerge --sync
-    sudo emerge --update --deep --newuse @world
-elif [[ $linux_flavor == "suse" ]]; then
-    sudo zypper refresh
-    sudo zypper update -y
-elif [[ $linux_flavor == "debian" ]]; then
-    sudo apt update && sudo apt upgrade -y
-elif [[ $linux_flavor == "ubuntu" ]]; then
-    sudo apt update && sudo apt upgrade -y
-elif [[ $linux_flavor == "alpine" ]]; then
-    sudo apk update
-    sudo apk upgrade
-fi
-
-# Install Docker
-if [[ $linux_flavor == "redhat" ]]; then
-    sudo yum install -y docker
-elif [[ $linux_flavor == "arch" ]]; then
-    sudo pacman -S --noconfirm docker
-elif [[ $linux_flavor == "gentoo" ]]; then
-    sudo emerge --ask app-emulation/docker
-elif [[ $linux_flavor == "suse" ]]; then
-    sudo zypper install -y docker
-elif [[ $linux_flavor == "debian" ]]; then
-    sudo apt install -y docker.io
-elif [[ $linux_flavor == "ubuntu" ]]; then
-    sudo apt install -y docker.io
-elif [[ $linux_flavor == "alpine" ]]; then
-    sudo apk add docker
-fi
-
-# Check if Docker is running
-if sudo systemctl is-active --quiet docker; then
-    echo "Docker is running."
-
-    # Fetch Docker Compose file and deploy Docker stack
-    curl -O https://raw.githubusercontent.com/himanshuja/setup/main/docker-compose.yml
-    sudo docker-compose up -d
-
-    # Return Docker installation environment file details
-    docker_info=$(sudo docker system info)
-    echo "$docker_info"
-else
-    echo "Docker is not running."
-fi
+  phpmyadmin:
+    image: phpmyadmin:latest
+    environment:
+     - PMA_HOST= db
+     - MYSQL_ROOT_PASSWORD= root
+    # ports:
+    #   - '8081:80'
+    depends_on:
+      - db
+  n8n:
+    image: n8nio/n8n
+    restart: unless-stopped
+    environment:
+      - DB_TYPE= mysqldb
+      - DB_MYSQLDB_HOST= db
+      - DB_MYSQLDB_PORT= 3306
+      - DB_MYSQLDB_DATABASE= n8n
+      - DB_MYSQLDB_USER= root
+      - DB_MYSQLDB_PASSWORD= 8Deudue83e
+      - GENERIC_TIMEZONE= Asia/Kolkata
+      - DOMAIN_NAME= demo.workflow.teamat.work
+      - NODE_ENV= production
+      - WEBHOOK_URL= demo.workflow.teamat.work
+      - WORKFLOWS_DEFAULT_NAME= "n8n Workflow"
+      - EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS= true
+      - EXECUTIONS_DATA_SAVE_ON_ERROR= all
+      - EXECUTIONS_DATA_SAVE_ON_PROGRESS= true
+      - EXECUTIONS_DATA_SAVE_ON_SUCCESS= all
+    # ports:
+    #   - '5678:5678'
+    volumes:
+      - n8n_data:/root/.n8n
+    depends_on:
+      - db
 
 
-    # Remove the script file
-    rm "$0"
-} &>/dev/null & disown
-
-# Exit the current shell
-exit
+volumes:
+  proxymgr_data:
+    driver: local
+  proxymgr_letsencrypt:
+    driver: local
+  sql_data:
+    driver: local
+  n8n_data:
+    driver: local
